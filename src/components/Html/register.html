@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="Register.css">
+</head>
+<body>
+    <div class="auth-container">
+        <h2>Register</h2>
+        <form class="auth-form" id="register-form">
+            <div>
+                <label>Username :</label>
+                <input type="text" id="username" required />
+            </div>
+            <div>
+                <label>Email :</label>
+                <input type="email" id="email" required />
+            </div>
+            <div>
+                <label>Password :</label>
+                <input type="password" id="password" required />
+            </div>
+            <div>
+                <label>Confirm Password :</label>
+                <input type="password" id="confirmPassword" required />
+            </div>
+            <p id="error" style="color: red;"></p>
+            <button class="btn" type="submit" id="register-btn">Register</button>
+            <div class="check">
+                <input type="checkbox" id="terms-check"/>
+                <label>Accept Terms & conditions</label>
+            </div>
+            <div class="lab1"> 
+                <label>Already have an account?</label>
+                <a href="/login" class="register-link">Login</a>
+            </div>
+        </form>
+    </div>
+    <script>
+        document.getElementById('register-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const username = document.getElementById('username').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const errorElement = document.getElementById('error');
+    const registerBtn = document.getElementById('register-btn');
+
+    errorElement.textContent = '';
+
+    const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const validatePassword = (password) => password.length >= 8;
+
+    if (!username || !email || !password || !confirmPassword) {
+        errorElement.textContent = 'All fields are required';
+        return;
+    }
+
+    if (!validateEmail(email)) {
+        errorElement.textContent = 'Please enter a valid email address';
+        return;
+    }
+
+    if (!validatePassword(password)) {
+        errorElement.textContent = 'Password must be at least 8 characters long';
+        return;
+    }
+
+    if (password !== confirmPassword) {
+        errorElement.textContent = 'Passwords do not match';
+        return;
+    }
+
+    registerBtn.textContent = 'Registering...';
+    registerBtn.disabled = true;
+
+    try {
+        const response = await fetch('http://localhost:4000/auth/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username, email, password }),
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            alert(data.message);
+            window.location.href = '/login';
+        } else {
+            const errorData = await response.json();
+            errorElement.textContent = errorData.message || 'Registration failed';
+        }
+    } catch (error) {
+        errorElement.textContent = 'Registration failed';
+    } finally {
+        registerBtn.textContent = 'Register';
+        registerBtn.disabled = false;
+    }
+});
+
+    </script>
+</body>
+</html>
